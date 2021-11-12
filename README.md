@@ -14,3 +14,6 @@ javascript study..
 
 5. simple-express
   - express(+ jade, body-parser, path) 를 이용하여 기본적인 구조 구성하기
+
+6. file-express
+  - express 프레임워크에서 파일 다루는 예제(생성, 목록조회, 파일내용조회)
