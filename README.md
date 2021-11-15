@@ -17,3 +17,7 @@ javascript study..
 
 6. file-express
   - express 프레임워크에서 파일 다루는 예제(생성, 목록조회, 파일내용조회)
+
+7. db-express
+  - express 프레임워크에서 mysql 다루는 예제(CRUD)
+  - local, development, product 등 환경에 따른 환경변수 구성하기(json 활용)

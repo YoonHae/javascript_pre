@@ -1,3 +1,4 @@
 goorm.manifest
 node_modules
 file-express/data
+settings/application.local.json
