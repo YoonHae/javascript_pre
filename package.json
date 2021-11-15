@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/YoonHae/javascript_pre/issues"
   },
-  "homepage": "https://github.com/YoonHae/javascript_pre#readme"
+  "homepage": "https://github.com/YoonHae/javascript_pre#readme",
+  "dependencies": {
+    "cookie-parser": "^1.4.5"
+  }
 }

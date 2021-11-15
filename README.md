@@ -21,3 +21,7 @@ javascript study..
 7. db-express
   - express 프레임워크에서 mysql 다루는 예제(CRUD)
   - local, development, product 등 환경에 따른 환경변수 구성하기(json 활용)
+
+8. cookie
+  - basic-app.js : 쿠키의 기본적인 사용 예제.(cookie-parser 모듈)
+  - cart-app.js : 장바구니 기능 관련 예제 + 암복호화 기능 활용
