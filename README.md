@@ -25,3 +25,8 @@ javascript study..
 8. cookie
   - basic-app.js : 쿠키의 기본적인 사용 예제.(cookie-parser 모듈)
   - cart-app.js : 장바구니 기능 관련 예제 + 암복호화 기능 활용
+
+
+9. session
+  - session 을 다루는 login/logout 예제
+  - session 정보를 mysql 에 저장하도록 추가 모듈 사용(express-mysql-session)
