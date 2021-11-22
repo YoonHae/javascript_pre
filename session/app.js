@@ -30,6 +30,10 @@ app.use(session({
         })
 }));
 
+// password 암호화에 사용할 암호화 모듈
+var bkfd2Password = require("pbkdf2-password");
+var hasher = bkfd2Password();
+
 app.get('/count', function(req, res) {
     if (req.session.count)
         req.session.count++;
@@ -51,34 +55,44 @@ app.get('/auth/login', function(req, res) {
     res.send(output);
 });
 
+var userList = [{
+        username: 'admin',
+        //password: 'qwer1234',
+        password: 'tc2+8OSQ5E9/dr1sf4YUSO/6Jc1MGjIW6MZ9lQGPbO4MEL8qqrE9fyEIWeuV2em+T29oKVMdUkmH1rKHGyQs9i0gPNeoaiFEsrEn/0EpWRclz2vRtabDzZKd/I+PQLi7vnLufsoOoUwLpheZ22TIz37NRnM40E/g3s/aypDDyOk=',
+        salt: 'yeU7hc2Nu8iWm8kiFHy/MNyWoHV9J/2rZwwf6IU9wEhVRKafu5BqkQ10JkSDXMnKo3NSvwLhE6ZPwnz0SNOT8w==',
+        displayName: 'AAAAAdmin'
+    }];
 
 /// 세션에 대한 로직은 개발시 용이하게하기 위함.
 /// 실제 개발시 다른 방법을 사용해야함.
 app.post('/auth/login', function(req, res){
     // 단순한 실습용 정보
-    var sampleUser = {
-        username: 'admin',
-        password: 'qwer1234',
-        displayName: 'AAAAAdmin'
-    };
-
     var uname = req.body.username;
     var pwd = req.body.password;
-    if (uname === sampleUser.username && pwd === sampleUser.password) {
-        // 로그인 시 welcome page 에서 사용할 별명정보 세션에 저장
-        req.session.displayName = sampleUser.displayName;
 
-        /* 메모리가 아닌 DB 에 저장된 경우 
-           데이터 저장이 늦어지고 redirect 가 더 빨리 이루어져서
-           로그인이 안된 것처럼 동작할 수 있다.
-           save 함수의 callback 에서 redirect 하면
-           저장 완료 후 callback 이 호출되서 정상적으로 사용이 가능하다. */
-        req.session.save(function()  {
-            res.redirect('/welcome');
-        })
-    } else {
-        res.send('Who are you? <a href="/auth/login">login</a>');
+    for(var user of userList) {
+        if (user.username == uname) {
+            // hasher 호출시 salt 를 누락하고  호출하면 직접 생성하여 암호화하고 콜백에서 전달해준다.(등록시 사용)
+            return hasher({password: pwd, salt: user.salt}, function(err, pass, salt, hash){
+                if (hash === user.password) {
+                    // 로그인 시 welcome page 에서 사용할 별명정보 세션에 저장
+                    req.session.displayName = user.displayName;
+            
+                    /* 메모리가 아닌 DB 에 저장된 경우 
+                    데이터 저장이 늦어지고 redirect 가 더 빨리 이루어져서
+                    로그인이 안된 것처럼 동작할 수 있다.
+                    save 함수의 callback 에서 redirect 하면
+                    저장 완료 후 callback 이 호출되서 정상적으로 사용이 가능하다. */
+                    req.session.save(function()  {
+                        res.redirect('/welcome');
+                    })
+                } else {
+                    res.send('Who are you? <a href="/auth/login">login</a>');
+                }
+            });
+        }
     }
+    res.send('Who are you? <a href="/auth/login">login</a>');
 });
 
 
@@ -92,9 +106,44 @@ app.get('/welcome', function(req, res) {
         res.send(`
             <h1>Welcome</h1>
             <a href="/auth/login">login</a>
+            <a href="/auth/register">register</a>
         `);
     }
 });
+
+
+app.get('/auth/register', function(req, res) {
+    var output = `
+        <h1>Login</h1>
+        <form action="/auth/register" method="post">
+            <p> <input type="text", name="username" placeholder="username"> </p>
+            <p> <input type="password", name="password" placeholder="password"> </p>
+            <p> <input type="text", name="displayName" placeholder="display name"> </p>
+            <p> <input type="submit"</p>
+        </form>
+    `;
+    res.send(output);
+});
+
+app.post('/auth/register', function(req, res) {
+    var uname = req.body.username;
+    var pwd = req.body.password;
+    var dname = req.body.displayName;
+
+    hasher({password: pwd}, function(err, pass, salt, hash){
+        userList.push({
+            username: uname,
+            password: hash,
+            salt: salt,
+            displayName: dname
+        });
+        req.session.displayName = dname;
+        req.session.save(function()  {
+            res.redirect('/welcome');
+        })
+    });
+});
+
 
    
 app.get('/auth/logout', function(req, res) {
