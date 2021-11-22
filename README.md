@@ -27,6 +27,9 @@ javascript study..
   - cart-app.js : 장바구니 기능 관련 예제 + 암복호화 기능 활용
 
 
-9. session
+9.1 session(app.js)
   - session 을 다루는 login/logout 예제
   - session 정보를 mysql 에 저장하도록 추가 모듈 사용(express-mysql-session)
+
+9.2 session(app-passport.js)
+  - 9.1  에서 passport 를 이용하여 세션관리, 로그인핸들링하는 예제
