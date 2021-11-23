@@ -37,6 +37,8 @@ var hasher = bkfd2Password();
 // id/password 를 활용하는 경우 username / password 로 고정해야함
 var passport = require('passport')
 var LocalStrategy = require('passport-local').Strategy;
+// 타사인증로직이 추가됨으로써 진정한 passport 의 이점이 발현됨
+var FacebookStrategy = require('passport-facebook').Strategy;
 app.use(passport.initialize());  // 초기화
 app.use(passport.session());   // 세션 세팅 이후에 설정해야한다.
 
@@ -63,11 +65,38 @@ passport.use(new LocalStrategy(
     }
 ));
 
-// 위의 LocalStratege 에 등록된 함수에서 done 이 성공으로 호출된 경우 
-// LocalStratege 내 done 의 두번째 인자가 여기 user 로 넘겨짐
+
+passport.use(new FacebookStrategy({
+    clientID: config.FACEBOOK_APP.id ,
+    clientSecret: config.FACEBOOK_APP.code,
+    // 인증관련 한단계 더
+    callbackURL: "/auth/facebook/callback",
+    profileFields: ['id', 'displayName', 'email', 'gender', 'link', 'locale', 'name', 'timezone', 'updated_time', 'verified']
+  },
+  function(accessToken, refreshToken, profile, done) {
+      console.log(profile);
+      var authId = 'facebook:' + profile.id;
+      for(var user of userList){
+          if (user.authId && user.authId === authId) {
+              return done(null, user);
+          }
+      }
+
+      var newUser = {
+          authId: 'facebook:' + profile.id,
+          displayName: profile.displayName
+      };
+      userList.push(newUser);
+      done(null, newUser);
+  }
+));
+
+
+// 위의 LocalStratege/FacebookStrategy 에 등록된 함수에서 done 이 성공으로 호출된 경우 
+// LocalStratege/FacebookStrategy 내 done 의 두번째 인자가 여기 user 로 넘겨짐
 passport.serializeUser(function(user, done) {
-    console.log("serializeUser", user.username);
-    done(null, user.username);
+    // user 정보 중 특정정보를 세션정보에 등록시킴
+    done(null, user.authId);
 });
 
 
@@ -75,10 +104,11 @@ passport.serializeUser(function(user, done) {
 passport.deserializeUser(function(id, done) {
     console.log("deserializeUser", id);
     for(var user of userList) {
-        if (user.username === id) {
+        if (user.authId === id) {
             return done(null, user);
         }
     }
+    done(null, false);
   });
 
 app.get('/auth/login', function(req, res) {
@@ -88,12 +118,14 @@ app.get('/auth/login', function(req, res) {
             <p> <input type="text", name="username" placeholder="username"> </p>
             <p> <input type="password", name="password" placeholder="password"> </p>
             <p> <input type="submit"</p>
+            <p> <a href="/auth/facebook">FACEBOOK</a></p>
         </form>
     `;
     res.send(output);
 });
 
 var userList = [{
+        authId: 'local:admin',
         username: 'admin',
         //password: 'qwer1234',
         password: 'tc2+8OSQ5E9/dr1sf4YUSO/6Jc1MGjIW6MZ9lQGPbO4MEL8qqrE9fyEIWeuV2em+T29oKVMdUkmH1rKHGyQs9i0gPNeoaiFEsrEn/0EpWRclz2vRtabDzZKd/I+PQLi7vnLufsoOoUwLpheZ22TIz37NRnM40E/g3s/aypDDyOk=',
@@ -111,38 +143,18 @@ app.post('/auth/login',
             failureFlash: false
         })  );
 
-// /// 세션에 대한 로직은 개발시 용이하게하기 위함.
-// /// 실제 개발시 다른 방법을 사용해야함.
-// app.post('/auth/login', function(req, res){
-//     // 단순한 실습용 정보
-//     var uname = req.body.username;
-//     var pwd = req.body.password;
+/** 
+ * 1. front 에서 /auth/facebook  을 호출
+ * 2. passport 가 facebook 인증 페이지로 이동
+ * 3. facebook 에서 인증절차 진행
+ * 4. facebook app 에 등록한 url 과 FacebookStrategy 에 callback 으로 등록한 url 을 merge 해서 facebook 이 호출해줌
+ * 5. /auth/facebook/callback 가 호출되면 성패에 따라 option 내용의 redirection 진행
+*/
+app.get('/auth/facebook', passport.authenticate('facebook', {scope:'email'}));
 
-//     for(var user of userList) {
-//         if (user.username == uname) {
-//             // hasher 호출시 salt 를 누락하고  호출하면 직접 생성하여 암호화하고 콜백에서 전달해준다.(등록시 사용)
-//             return hasher({password: pwd, salt: user.salt}, function(err, pass, salt, hash){
-//                 if (hash === user.password) {
-//                     // 로그인 시 welcome page 에서 사용할 별명정보 세션에 저장
-//                     req.session.displayName = user.displayName;
-            
-//                     /* 메모리가 아닌 DB 에 저장된 경우 
-//                     데이터 저장이 늦어지고 redirect 가 더 빨리 이루어져서
-//                     로그인이 안된 것처럼 동작할 수 있다.
-//                     save 함수의 callback 에서 redirect 하면
-//                     저장 완료 후 callback 이 호출되서 정상적으로 사용이 가능하다. */
-//                     req.session.save(function()  {
-//                         res.redirect('/welcome');
-//                     })
-//                 } else {
-//                     res.send('Who are you? <a href="/auth/login">login</a>');
-//                 }
-//             });
-//         }
-//     }
-//     res.send('Who are you? <a href="/auth/login">login</a>');
-// });
-
+app.get('/auth/facebook/callback',
+  passport.authenticate('facebook', { successRedirect: '/welcome',
+                                      failureRedirect: '/auth/login' }));
 
 app.get('/welcome', function(req, res) {
     // passport 가 req 가 user 를 등록해준다.
@@ -181,6 +193,7 @@ app.post('/auth/register', function(req, res) {
 
     hasher({password: pwd}, function(err, pass, salt, hash){
         var user = {
+            authId: 'local:' + uname,
             username: uname,
             password: hash,
             salt: salt,

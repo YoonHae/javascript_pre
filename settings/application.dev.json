@@ -5,5 +5,9 @@
         "user": "admin",
         "password": "1234",
         "database": "mysql_db"
+    },
+    "facebook_app": {
+        "id": "1122334455",
+        "code": "11223344556677889900"
     }
 }

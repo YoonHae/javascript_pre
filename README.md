@@ -33,3 +33,4 @@ javascript study..
 
 9.2 session(app-passport.js)
   - 9.1  에서 passport 를 이용하여 세션관리, 로그인핸들링하는 예제
+  - facebook 인증을 이용한 로그인 기능 추가
