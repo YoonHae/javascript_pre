@@ -38,3 +38,5 @@ javascript study..
 9.3 session(app-passport-mysql.js)
   - 계정관리를 mysql 로 구성하도록 로직 보완
   
+10. routes
+  - 특정 기능별로(url 구간별로) 파일 나누기 예제
