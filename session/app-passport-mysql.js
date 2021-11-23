@@ -126,7 +126,6 @@ passport.use(new FacebookStrategy({
       });
   }
 ));
-//01063758406
 
 // 위의 LocalStratege/FacebookStrategy 에 등록된 함수에서 done 이 성공으로 호출된 경우 
 // LocalStratege/FacebookStrategy 내 done 의 두번째 인자가 여기 user 로 넘겨짐
