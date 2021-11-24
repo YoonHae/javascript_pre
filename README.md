@@ -41,3 +41,6 @@ javascript study..
 10. routes
   - 특정 기능별로(url 구간별로) 파일 나누기 예제
   - 다양한 방식의 라우팅 방법 기술.
+
+11. auth-topic
+  - 7.db-express, 9.3.session, 10.routes 기능을 이용하여 하나의 예제 구성
