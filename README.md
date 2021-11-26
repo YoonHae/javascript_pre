@@ -44,3 +44,6 @@ javascript study..
 
 11. auth-topic
   - 7.db-express, 9.3.session, 10.routes 기능을 이용하여 하나의 예제 구성
+
+12. ajax
+  - 간단한 예제(fetch)
