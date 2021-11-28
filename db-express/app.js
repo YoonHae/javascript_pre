@@ -14,7 +14,7 @@ app.use(bodyParser.urlencoded({extended: false}));
 
 var mysql = require('mysql');
 
-const config = require(path.join(process.cwd(), 'settings/env.js'));
+const config = require(path.join(__dirname, './../settings/env.js'));
 
 var conn = mysql.createConnection({
     host: config.DB_CONFIG.host,
