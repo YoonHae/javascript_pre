@@ -1,6 +1,6 @@
 // 환경 변수
 const path = require('path');
-global.custom_env = require(path.join(process.cwd(), 'settings/env.js'));
+global.custom_env = require(path.join(__dirname, '../settings/env.js')); 
 global.__workdir = __dirname;
 
 var app = require('./config/express')();
