@@ -6,7 +6,7 @@ app.use(bodyParser.urlencoded({extended:false}));
 
 // 환경 변수
 const path = require('path');
-const config = require(path.join(process.cwd(), 'settings/env.js'));
+const config = require(path.join(__dirname, '../settings/env.js'));
 
 //** 세션 사용에 필요한 모듈s */ 
 // 기본 세션사용을 위한 모듈
